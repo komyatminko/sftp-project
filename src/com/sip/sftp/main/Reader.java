@@ -2,6 +2,7 @@ package com.sip.sftp.main;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.Vector;
 
 import com.jcraft.jsch.ChannelSftp;
@@ -42,6 +43,9 @@ public class Reader {
 		
 		//file upload from local system onto sftp server using Jsch
 		uploadFileFromSystemToServer(sftpUtils, channelSftp, TargetPath);
+		
+		//file download from server to file local system.
+//		downloadFromServerToFileSys(sftpUtils, channelSftp, TargetPath);
 	}
 
 	private static void uploadFileFromSystemToServer(SFTPUtils sftpUtils, ChannelSftp channelSftp, String TargetPath) {
@@ -55,6 +59,28 @@ public class Reader {
 				channelSftp.put(new FileInputStream(localFilePath), "tailwind-css-starter-kit_compress.pdf");
 				System.out.println("Uploaded file successfully.");
 			} catch (FileNotFoundException | SftpException e) {
+				e.printStackTrace();
+			} finally {
+				sftpUtils.disconnect();
+			}
+		}
+	}
+	
+	private static void downloadFromServerToFileSys(SFTPUtils sftpUtils, ChannelSftp channelSftp, String sourcePath) {
+		String localFilePath = "C:\\Users\\myatminko\\workspace\\PdfFiles Output\\";
+		boolean isDirExit = sftpUtils.isDirectoryExist(channelSftp, sourcePath);
+		if(isDirExit) {
+			
+			try {
+				Vector<LsEntry> files = channelSftp.ls(sourcePath);
+				if (files.size() > 0) {
+					for(LsEntry file : files) {
+						channelSftp.get(sourcePath+ file.getFilename(), new FileOutputStream(localFilePath+ file.getFilename()));
+						System.out.println("File downloaded successfully.");
+					}
+				}
+			} catch (FileNotFoundException | SftpException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
 				sftpUtils.disconnect();
