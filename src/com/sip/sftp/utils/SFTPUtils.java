@@ -65,7 +65,6 @@ public class SFTPUtils {
 			channelSftp.cd(path);
 			return true;
 		} catch (SftpException e) {
-			// TODO Auto-generated catch block
 			return false;
 		}
 
@@ -81,7 +80,7 @@ public class SFTPUtils {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 		channelSftp.put(inputStream, copyTargetPath);
 		
-		System.out.println("File copied from " + sourcePath + " to " + copyTargetPath);
+		System.out.println("File copied from " + sourcePath + " to " + copyTargetPath + "\n");
 		
 	}
 
@@ -91,7 +90,29 @@ public class SFTPUtils {
 		
 		channelSftp.rm(sourcePath);
 		
-		System.out.println("File moved from " + sourcePath + " to " + moveTargetPath);
+		System.out.println("File moved from " + sourcePath + " to " + moveTargetPath + "\n");
+		
+	}
+	
+	public void createNestedDirectory(ChannelSftp channelSftp, String directory) {
+		
+		String [] folders = directory.split("/");
+		String currentPath = "";
+		
+		for(String folder : folders) {
+			
+			currentPath += "/" + folder;
+			try {
+				channelSftp.cd(currentPath);
+			} catch (SftpException e) {
+				try {
+					channelSftp.mkdir(currentPath);
+					System.out.println(currentPath + " is created");
+				} catch (SftpException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
 		
 	}
 
