@@ -3,12 +3,14 @@ package com.sip.sftp.utils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Properties;
+import java.util.Vector;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+import com.jcraft.jsch.ChannelSftp.LsEntry;
 
 public class SFTPUtils {
 
@@ -35,8 +37,8 @@ public class SFTPUtils {
 			System.out.println("Session connected successfully.");
 
 			Channel channel = session.openChannel("sftp");
-			channel.connect();
 			channelSftp = (ChannelSftp) channel;
+			channel.connect();
 
 			System.out.println("SFTP Channel connected successfully.");
 			return channelSftp;
@@ -116,6 +118,34 @@ public class SFTPUtils {
 		
 	}
 	
+	public void deleteNestedDirectory(ChannelSftp channelSftp, String path) throws SftpException {
+        System.out.println("Listing contents of folder: " + path);
+        Vector<LsEntry> entries = channelSftp.ls(path);
+
+        for (LsEntry entry : entries) {
+            String fileName = entry.getFilename();
+
+            // Skip current and parent dir references
+            if (".".equals(fileName) || "..".equals(fileName)) {
+                continue;
+            }
+
+            String fullPath = path + "/" + fileName;
+
+            if (entry.getAttrs().isDir()) {
+                System.out.println("Found directory: " + fullPath + " — descending into it");
+                // Recursive call to delete subfolder
+                deleteNestedDirectory(channelSftp, fullPath);
+            } else {
+                System.out.println("Deleting file: " + fullPath);
+                channelSftp.rm(fullPath);
+            }
+        }
+
+        // After deleting contents, delete the folder itself
+        System.out.println("Deleting folder: " + path);
+        channelSftp.rmdir(path);
+    }
 
 
 }

@@ -22,6 +22,43 @@ public class Reader {
 		String TargetPath = "/UOBK_BounceMail_ContentRepo/MMK_Test/";
 		
 		//create new folder if it is not exit
+//		createNewDir(channelSftp, TargetPath);
+
+		//moving and copying file from one folder to another folder on the server
+//		fileMoveAndCopy(sftpUtils, sourcePath, channelSftp, TargetPath);
+		
+		//creating nested folder e.g a/b/c
+//		createNestedDirectory(sftpUtils, channelSftp);
+		
+		//deleting nested folder e.g a/b/c
+		deleteNestedDirectory(sftpUtils, channelSftp);
+		
+		//file upload from local system onto sftp server using Jsch
+//		uploadFileFromSystemToServer(sftpUtils, channelSftp, TargetPath);
+		
+		//file download from server to file local system.
+//		downloadFromServerToFileSys(sftpUtils, channelSftp, TargetPath);
+		
+		//remove empty folder and can't delete if a folder has files and folder inside
+//		deleteEmptyFolder(sftpUtils, channelSftp);
+	}
+
+	private static void deleteEmptyFolder(SFTPUtils sftpUtils, ChannelSftp channelSftp) {
+		String folderPath = "/UOBK_BounceMail_ContentRepo/DoneClone/UOBK_BounceMail_ContentRepoMMK_TestJavaSpringBoot";
+		
+		boolean isDirExit = sftpUtils.isDirectoryExist(channelSftp, folderPath);
+		if(isDirExit) {
+			try {
+				channelSftp.rmdir(folderPath);
+				System.out.println("The whole directory deleted successfully.");
+			} catch (SftpException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private static void createNewDir(ChannelSftp channelSftp, String TargetPath) {
 		try {
 			channelSftp.cd(TargetPath);
 		} catch (SftpException e) {
@@ -32,20 +69,6 @@ public class Reader {
 				ex.printStackTrace();
 			}
 		}
-
-		
-
-		//moving and copying file from one folder to another folder on the server
-//		fileMoveAndCopy(sftpUtils, sourcePath, channelSftp, TargetPath);
-		
-		//creating nested folder e.g a/b/c
-//		createNestedDirectory(sftpUtils, channelSftp);
-		
-		//file upload from local system onto sftp server using Jsch
-		uploadFileFromSystemToServer(sftpUtils, channelSftp, TargetPath);
-		
-		//file download from server to file local system.
-//		downloadFromServerToFileSys(sftpUtils, channelSftp, TargetPath);
 	}
 
 	private static void uploadFileFromSystemToServer(SFTPUtils sftpUtils, ChannelSftp channelSftp, String TargetPath) {
@@ -92,6 +115,17 @@ public class Reader {
 		String pathToCreate = "/UOBK_BounceMail_ContentRepo/MMK_Test/Java/SpringBoot";
 		sftpUtils.createNestedDirectory(channelSftp, pathToCreate);
 		sftpUtils.disconnect();
+	}
+	
+	private static void deleteNestedDirectory(SFTPUtils sftpUtils, ChannelSftp channelSftp) {
+		String pathToDelete = "/UOBK_BounceMail_ContentRepo/MMK_Test/";
+		try {
+			sftpUtils.deleteNestedDirectory(channelSftp, pathToDelete);
+			sftpUtils.disconnect();
+		} catch (SftpException e) {
+			sftpUtils.disconnect();
+			e.printStackTrace();
+		}
 	}
 
 	private static void fileMoveAndCopy(SFTPUtils sftpUtils, String sourcePath, ChannelSftp channelSftp, String TargetPath) {
